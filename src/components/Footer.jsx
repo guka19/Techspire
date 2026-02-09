@@ -61,7 +61,7 @@ const Footer = () => {
             </div>
             <div className="flex items-center space-x-3 text-sm text-gray-500">
               <Mail className="h-5 w-5 text-black shrink-0" />
-              <span>hello@bitasmbl.com</span>
+              <span>hello@techspire.com</span>
             </div>
           </div>
 
@@ -70,7 +70,7 @@ const Footer = () => {
         {/* Bottom Bar */}
         <div className="mt-12 pt-8 border-t border-gray-100 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-xs text-gray-400">
-            &copy; 2026 Bitasmbl. All rights reserved. Built with MERN.
+            &copy; 2026 Techspire. All rights reserved. Built with MERN.
           </p>
           <div className="flex space-x-6 text-xs text-gray-400">
             <a href="#" className="hover:text-black">Privacy Policy</a>
