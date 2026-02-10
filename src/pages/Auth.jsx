@@ -1,21 +1,46 @@
 import React, { useState } from 'react';
-import { Mail, Lock, User, ArrowRight, Loader2, Phone } from 'lucide-react'; // Added Phone icon
+import { Mail, Lock, User, ArrowRight, Loader2, Phone } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import API from '../api/axios';
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
   const navigate = useNavigate();
+
+  const [formData, setFormData] = useState({
+    fullName: '',
+    email: '',
+    password: '',
+    phoneNumber: ''
+  });
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
+    setError('');
 
-    // Simulated API call
-    setTimeout(() => {
+    try {
+      const endpoint = isLogin ? '/users/login' : '/users/register';
+      const response = await API.post(endpoint, formData);
+
+      // Save credentials
+      localStorage.setItem('token', response.data.token);
+      localStorage.setItem('user', JSON.stringify(response.data.user));
+
+      // Redirect home and refresh to update Navbar
+      navigate('/');
+      window.location.reload(); 
+    } catch (err) {
+      setError(err.response?.data?.message || 'Authentication failed');
+    } finally {
       setIsLoading(false);
-      navigate('/'); 
-    }, 2000);
+    }
   };
 
   return (
@@ -25,67 +50,36 @@ const Auth = () => {
           <h2 className="text-4xl font-extrabold tracking-tight text-black">
             {isLogin ? 'Welcome back' : 'Create account'}
           </h2>
-          <p className="mt-2 text-sm text-gray-500">
-            {isLogin ? "Don't have an account?" : "Already have an account?"}{' '}
-            <button
-              onClick={() => setIsLogin(!isLogin)}
-              className="font-semibold text-black underline underline-offset-4 hover:text-gray-600"
-            >
-              {isLogin ? 'Sign up for free' : 'Log in to your account'}
-            </button>
-          </p>
+          <button onClick={() => setIsLogin(!isLogin)} className="mt-2 text-sm text-gray-500 underline underline-offset-4">
+            {isLogin ? "Don't have an account? Sign up" : "Already have an account? Log in"}
+          </button>
         </div>
 
-        <div className="mt-8 rounded-3xl border border-gray-100 bg-white p-8 shadow-2xl shadow-gray-200/50">
+        <div className="mt-8 rounded-3xl border border-gray-100 bg-white p-8 shadow-2xl">
+          {error && <div className="mb-4 text-center text-sm text-red-500 bg-red-50 p-2 rounded-lg border border-red-100">{error}</div>}
           <form onSubmit={handleSubmit} className="space-y-5">
             {!isLogin && (
               <>
-                {/* Full Name Field */}
                 <div className="relative">
-                  <User className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
-                  <input 
-                    required 
-                    type="text" 
-                    placeholder="Full Name" 
-                    className="w-full rounded-xl border border-gray-200 bg-gray-50 py-4 pl-12 pr-4 text-sm focus:border-black focus:outline-none focus:ring-1 focus:ring-black" 
-                  />
+                  <User className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 h-5 w-5" />
+                  <input required name="fullName" onChange={handleChange} type="text" placeholder="Full Name" className="w-full rounded-xl border border-gray-200 bg-gray-50 py-4 pl-12 pr-4 text-sm focus:outline-none focus:ring-1 focus:ring-black" />
                 </div>
-                
-                {/* NEW: Phone Number Field (Only for Register) */}
                 <div className="relative">
-                  <Phone className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
-                  <input 
-                    required 
-                    type="tel" 
-                    placeholder="Phone Number (e.g. +995...)" 
-                    className="w-full rounded-xl border border-gray-200 bg-gray-50 py-4 pl-12 pr-4 text-sm focus:border-black focus:outline-none focus:ring-1 focus:ring-black" 
-                  />
+                  <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 h-5 w-5" />
+                  <input required name="phoneNumber" onChange={handleChange} type="tel" placeholder="Phone Number" className="w-full rounded-xl border border-gray-200 bg-gray-50 py-4 pl-12 pr-4 text-sm focus:outline-none focus:ring-1 focus:ring-black" />
                 </div>
               </>
             )}
-
             <div className="relative">
-              <Mail className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
-              <input required type="email" placeholder="Email address" className="w-full rounded-xl border border-gray-200 bg-gray-50 py-4 pl-12 pr-4 text-sm focus:border-black focus:outline-none focus:ring-1 focus:ring-black" />
+              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 h-5 w-5" />
+              <input required name="email" onChange={handleChange} type="email" placeholder="Email address" className="w-full rounded-xl border border-gray-200 bg-gray-50 py-4 pl-12 pr-4 text-sm focus:outline-none focus:ring-1 focus:ring-black" />
             </div>
-
             <div className="relative">
-              <Lock className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
-              <input required type="password" placeholder="Password" className="w-full rounded-xl border border-gray-200 bg-gray-50 py-4 pl-12 pr-4 text-sm focus:border-black focus:outline-none focus:ring-1 focus:ring-black" />
+              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 h-5 w-5" />
+              <input required name="password" onChange={handleChange} type="password" placeholder="Password" className="w-full rounded-xl border border-gray-200 bg-gray-50 py-4 pl-12 pr-4 text-sm focus:outline-none focus:ring-1 focus:ring-black" />
             </div>
-
-            <button
-              disabled={isLoading}
-              className="group flex w-full items-center justify-center rounded-full bg-black py-4 font-semibold text-white transition-all hover:bg-gray-800 disabled:bg-gray-400"
-            >
-              {isLoading ? (
-                <Loader2 className="h-5 w-5 animate-spin" />
-              ) : (
-                <>
-                  {isLogin ? 'Sign In' : 'Create Account'}
-                  <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
-                </>
-              )}
+            <button disabled={isLoading} className="flex w-full items-center justify-center rounded-full bg-black py-4 font-semibold text-white hover:bg-gray-800 disabled:bg-gray-400">
+              {isLoading ? <Loader2 className="animate-spin" /> : (isLogin ? 'Sign In' : 'Create Account')}
             </button>
           </form>
         </div>
