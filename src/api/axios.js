@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const API = axios.create({
-  baseURL: 'http://localhost:3000',
+  baseURL: 'https://techspire-api.onrender.com',
 });
 
 // This "Interceptor" automatically attaches your Bearer token to every request
